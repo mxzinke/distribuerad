@@ -1,12 +1,13 @@
 package events_http
 
 import (
+	domain "distribuerad/interface"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 )
 
-func StartHTTP(bindAddr string, store IChannelStore) {
+func StartHTTP(bindAddr string, store domain.IChannelStore) {
 	router := httprouter.New()
 
 	router.POST("/events/:channelName", handleCreateNewEvent(store))
@@ -18,7 +19,7 @@ func StartHTTP(bindAddr string, store IChannelStore) {
 	log.Fatalln(http.ListenAndServe(bindAddr, router))
 }
 
-func resolveChannelName(store IChannelStore, params httprouter.Params) IChannel {
+func resolveChannelName(store domain.IChannelStore, params httprouter.Params) domain.IChannel {
 	channelName := params.ByName("channelName")
 	channel := store.GetChannel(channelName)
 	if channel == nil {

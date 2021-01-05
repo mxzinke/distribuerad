@@ -1,6 +1,7 @@
 package events
 
 import (
+	domain "distribuerad/interface"
 	"sync"
 )
 
@@ -9,24 +10,25 @@ type ChannelStore struct {
 	lock     *sync.RWMutex
 }
 
-func NewChannelStore() *ChannelStore {
+func NewChannelStore() domain.IChannelStore {
 	return &ChannelStore{
-		lock: &sync.RWMutex{},
+		lock:     &sync.RWMutex{},
+		channels: map[string]*Channel{},
 	}
 }
 
-func (store *ChannelStore) GetChannel(name string) *Channel {
+func (store *ChannelStore) GetChannel(name string) domain.IChannel {
 	store.lock.RLock()
 	defer store.lock.RUnlock()
 
 	return store.channels[name]
 }
 
-func (store *ChannelStore) AddChannel(name string) *Channel {
+func (store *ChannelStore) AddChannel(name string) domain.IChannel {
 	store.lock.Lock()
 	defer store.lock.Unlock()
 
-	if store.channels[name] == nil {
+	if store.channels[name] != nil {
 		return store.channels[name]
 	}
 	store.channels[name] = &Channel{

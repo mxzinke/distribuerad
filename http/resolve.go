@@ -1,6 +1,7 @@
 package events_http
 
 import (
+	"distribuerad/interface"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"log"
@@ -8,7 +9,7 @@ import (
 	"time"
 )
 
-func handleCreateNewEvent(store IChannelStore) httprouter.Handle {
+func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
@@ -29,7 +30,7 @@ func handleCreateNewEvent(store IChannelStore) httprouter.Handle {
 			return
 		}
 
-		var newEvent *Event
+		var newEvent *domain.Event
 		if event.PublishAt.IsZero() {
 			newEvent = channel.AddEvent(event.Data)
 		} else {
@@ -50,7 +51,7 @@ func handleCreateNewEvent(store IChannelStore) httprouter.Handle {
 	}
 }
 
-func handleGetAllEvents(store IChannelStore) httprouter.Handle {
+func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 

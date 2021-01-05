@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./events"
-	"./http"
+	"distribuerad/events"
+	"distribuerad/http"
 	"flag"
 	"fmt"
 )
@@ -17,6 +17,6 @@ func init() {
 }
 
 func main() {
-	bindAddr := fmt.Sprintf("%s:%d", address, port)
+	bindAddr := fmt.Sprintf("%s:%d", *address, *port)
 	events_http.StartHTTP(bindAddr, events.NewChannelStore())
 }

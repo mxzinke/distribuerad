@@ -1,14 +1,42 @@
 package events
 
 import (
+	"distribuerad/interface"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/rs/xid"
+	"sync"
 	"time"
 )
 
-func (c *Channel) AddDelayedEvent(data string, publishAt time.Time) *Event {
-	event := &Event{
-		ID:          uuid.New().String(),
+type Channel struct {
+	events []*domain.Event
+	lock   *sync.RWMutex
+}
+
+func (c *Channel) GetEvents() []*domain.Event {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	return c.events
+}
+
+func (c *Channel) AddEvent(data string) *domain.Event {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	event := &domain.Event{
+		ID:          xid.New().String(),
+		PublishedAt: time.Now(),
+		Data:        data,
+	}
+
+	c.events = append(c.events, event)
+	return event
+}
+
+func (c *Channel) AddDelayedEvent(data string, publishAt time.Time) *domain.Event {
+	event := &domain.Event{
+		ID:          xid.New().String(),
 		PublishedAt: publishAt,
 		Data:        data,
 	}
@@ -19,20 +47,6 @@ func (c *Channel) AddDelayedEvent(data string, publishAt time.Time) *Event {
 		c.events = append(c.events, event)
 	})
 
-	return event
-}
-
-func (c *Channel) AddEvent(data string) *Event {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	event := &Event{
-		ID:          uuid.New().String(),
-		PublishedAt: time.Now(),
-		Data:        data,
-	}
-
-	c.events = append(c.events, event)
 	return event
 }
 
