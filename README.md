@@ -30,9 +30,15 @@ POST /event/:channel-name
 HEADER: [ "Content-Type": "application/json" ]
 BODY: {
   "data": "<string data (e.g. JSON) which will be given to the service>",
-  "timestamp": "<optional, if the event is sent late>"
+  # Optional Parameters:
+  "publishAt": "<In ISO-8601 format, if not given it will publish immediately>"
 }
 ```
 
 ### Check the list of events
 
+```bash
+GET /event/:channel-name
+```
+
+You will receive a list of events.
