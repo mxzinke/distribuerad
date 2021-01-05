@@ -6,33 +6,39 @@ import (
 
 type ChannelStore struct {
 	channels map[string]*Channel
-	lock     *sync.Mutex
+	lock     *sync.RWMutex
 }
 
 func NewChannelStore() *ChannelStore {
 	return &ChannelStore{
-		lock: &sync.Mutex{},
+		lock: &sync.RWMutex{},
 	}
 }
 
-func (store *ChannelStore) FindChannel(name string) *Channel {
+func (store *ChannelStore) GetChannel(name string) *Channel {
+	store.lock.RLock()
+	defer store.lock.RUnlock()
+
 	return store.channels[name]
 }
 
 func (store *ChannelStore) AddChannel(name string) *Channel {
-	channel := &Channel{
+	store.lock.Lock()
+	defer store.lock.Unlock()
+
+	if store.channels[name] == nil {
+		return store.channels[name]
+	}
+	store.channels[name] = &Channel{
 		lock: &sync.RWMutex{},
 	}
 
-	store.lock.Lock()
-	store.channels[name] = channel
-	store.lock.Unlock()
-
-	return channel
+	return store.channels[name]
 }
 
 func (store *ChannelStore) DeleteChannel(name string) {
 	store.lock.Lock()
+	defer store.lock.Unlock()
+
 	delete(store.channels, name)
-	store.lock.Unlock()
 }
