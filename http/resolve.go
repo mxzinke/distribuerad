@@ -56,3 +56,14 @@ func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 		}
 	}
 }
+
+func handleDeleteEvent(store domain.IChannelStore) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if err := resolveChannelName(store, p).DeleteEvent(p.ByName("event-id")); err != nil {
+			w.WriteHeader(http.StatusGone)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	}
+}

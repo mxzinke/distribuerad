@@ -62,11 +62,15 @@ func (c *Channel) DeleteEvent(eventID string) error {
 		}
 	}
 
-	if index == 1 {
-		return fmt.Errorf("No event could be found with ID %s. Maybe it has already been picked up ", eventID)
+	if index == -1 {
+		return fmt.Errorf("No event could be found with ID %s. Maybe it has already been picked up.", eventID)
 	}
 
-	c.events = append(c.events[:index], c.events[index:]...)
+	if index == 0 {
+		c.events = c.events[1:]
+	} else {
+		c.events = append(c.events[:index], c.events[index+1:]...)
+	}
 
 	return nil
 }

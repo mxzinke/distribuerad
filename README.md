@@ -42,3 +42,12 @@ GET /event/:channel-name
 ```
 
 You will receive a list of events.
+
+### Take up an event
+
+```bash
+DELETE /event/:channel-name/:event-id
+```
+
+The given event will not be available anymore. The requested service then owns the event. It is the end of the event 
+lifecycle.

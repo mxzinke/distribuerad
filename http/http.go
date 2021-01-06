@@ -12,9 +12,7 @@ func StartHTTP(bindAddr string, store domain.IChannelStore) {
 
 	router.POST("/events/:channelName", handleCreateNewEvent(store))
 	router.GET("/events/:channelName", handleGetAllEvents(store))
-
-	// TODO: Implementing the two left routes:
-	// router.DELETE("/events/:channelName/:eventID", )
+	router.DELETE("/events/:channelName/:event-id", handleDeleteEvent(store))
 
 	log.Printf("Make Pub/Sub-Server available at %s", bindAddr)
 	log.Fatalln(http.ListenAndServe(bindAddr, router))
