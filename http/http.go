@@ -16,15 +16,11 @@ func StartHTTP(bindAddr string, store domain.IChannelStore) {
 	// TODO: Implementing the two left routes:
 	// router.DELETE("/events/:channelName/:eventID", )
 
+	log.Printf("Make Pub/Sub-Server available at %s", bindAddr)
 	log.Fatalln(http.ListenAndServe(bindAddr, router))
 }
 
 func resolveChannelName(store domain.IChannelStore, params httprouter.Params) domain.IChannel {
 	channelName := params.ByName("channelName")
-	channel := store.GetChannel(channelName)
-	if channel == nil {
-		channel = store.AddChannel(channelName)
-	}
-
-	return channel
+	return store.GetChannel(channelName)
 }

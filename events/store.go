@@ -7,21 +7,23 @@ import (
 
 type ChannelStore struct {
 	channels map[string]*Channel
-	lock     *sync.RWMutex
+	lock     *sync.Mutex
 }
 
 func NewChannelStore() domain.IChannelStore {
 	return &ChannelStore{
-		lock:     &sync.RWMutex{},
+		lock:     &sync.Mutex{},
 		channels: map[string]*Channel{},
 	}
 }
 
+// Returns a channel, if the channel does not exist yet, it will create one
 func (store *ChannelStore) GetChannel(name string) domain.IChannel {
-	store.lock.RLock()
-	defer store.lock.RUnlock()
+	if store.channels[name] != nil {
+		return store.channels[name]
+	}
 
-	return store.channels[name]
+	return store.AddChannel(name)
 }
 
 func (store *ChannelStore) AddChannel(name string) domain.IChannel {
