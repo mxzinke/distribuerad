@@ -2,8 +2,6 @@
 
 > A tool to assign and manage tasks, distributed to multiple services.
 
-**This project is heavily under construction, no actual use yet possible.**
-
 It addresses the issue, when you want to spawn a new task in a distributed system, which should be
 executed next (or with delay). The same thing does every Pub/Sub System, the only thing which is different,
 is that the events can be delayed.
@@ -13,7 +11,12 @@ as a Docker Container.
 
 ## Deploy
 
-*This part will come very soon...*
+```bash
+docker pull mxzinke/distribuerad:latest
+```
+
+You can use the Docker-Image, which you can find [here](https://hub.docker.com/repository/docker/mxzinke/distribuerad) or by cloning the repo and building it yourself.
+You are allowed to use the image as a container in a Kubernetes-Cluster or Development.
 
 ## How to use it?
 
