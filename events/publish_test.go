@@ -3,6 +3,7 @@ package events
 import (
 	domain "distribuerad/interface"
 	"fmt"
+	"sync"
 	"testing"
 )
 
@@ -16,6 +17,27 @@ func BenchmarkPublishOneChannel(b *testing.B) {
 	}
 }
 
+func BenchmarkMultiPublishAtOneChannel(b *testing.B) {
+	channelStore := NewChannelStore()
+	channel := channelStore.AddChannel("test")
+
+	wg := sync.WaitGroup{}
+	wg.Add(b.N)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			channel.AddEvent("HELLO1234-Event")
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkPublish2Channels(b *testing.B) {
+	benchmarkPublishNChannels(2, b)
+}
+
 func BenchmarkPublish4Channels(b *testing.B) {
 	benchmarkPublishNChannels(4, b)
 }
@@ -26,7 +48,8 @@ func BenchmarkPublish10Channels(b *testing.B) {
 
 func benchmarkPublishNChannels(n int, b *testing.B) {
 	channelStore := NewChannelStore()
-	onFinish := make(chan int, n+1)
+	wg := sync.WaitGroup{}
+	wg.Add(n)
 	var channels []domain.IChannel
 	for i := 0; i < n; i++ {
 		channels = append(channels, channelStore.AddChannel(fmt.Sprintf("test-%d", n)))
@@ -36,16 +59,14 @@ func benchmarkPublishNChannels(n int, b *testing.B) {
 
 	b.ResetTimer()
 	for _, channel := range channels {
-		go benchmarkAtChannel(channel, onFinish, everyChannelEvents)
+		go benchmarkAtChannel(channel, &wg, everyChannelEvents)
 	}
-	for i := 0; i < n; i++ {
-		<-onFinish
-	}
+	wg.Wait()
 }
 
-func benchmarkAtChannel(channel domain.IChannel, onFinish chan int, nEvents int) {
+func benchmarkAtChannel(channel domain.IChannel, wg *sync.WaitGroup, nEvents int) {
 	for i := 0; i < nEvents; i++ {
 		channel.AddEvent("HELLO1234-Event")
 	}
-	onFinish <- 1
+	wg.Done()
 }
