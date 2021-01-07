@@ -34,7 +34,9 @@ func (store *ChannelStore) AddChannel(name string) domain.IChannel {
 		return store.channels[name]
 	}
 	store.channels[name] = &Channel{
-		lock: &sync.RWMutex{},
+		lock:     &sync.RWMutex{},
+		jobs:     map[string]*jobExecution{},
+		jobsLock: &sync.RWMutex{},
 	}
 
 	return store.channels[name]

@@ -25,37 +25,95 @@ or Development.
 
 ## How to use it?
 
-It's very easy. We only have two main endpoints. The first is to publish/post a new task or event. The second is to get
-the list of open tasks/events. By using the third endpoint, the event can be removed / acquired.
+It's very easy. We separate in our concept into three types of objectives which you can spawn:
 
-### Add new events
+* Events - Meaning new messages, directly published to the queue
+* Delayed Events - Messages which will be published to the queue at a given point-of-time
+* Jobs - Recurring messages, defined by cronJob / cronTab definitions
+
+### Add an events (Events + Delayed Events)
 
 Using the following endpoint, you can create a new event in a channel. You don't have to handle, about creating the
 channel.
 
 ```bash
-POST /events/:channel-name
+POST /:channel-name/events
 HEADER: [ "Content-Type": "application/json" ]
 BODY: {
-  "data": "<string data (e.g. JSON) which will be given to the service>",
-  # Optional Parameters:
+  "data": "<string data (e.g. JSON) which will be shown in the event>",
+  # Parameter is used to add a Delayed-Event:
   "publishAt": "<In ISO-8601 format, if not given it will publish immediately>"
 }
 ```
 
-### Check the list of events
+### The queue
 
 ```bash
-GET /events/:channel-name
+GET /:channel-name/events
 ```
 
-You will receive a list of events.
+You will receive the complete queue, within the channel. If the channel does not exist yet, it will be created.
 
-### Take up an event
+### Remove an event / Message
 
 ```bash
-DELETE /events/:channel-name/:event-id
+DELETE /:channel-name/events/:event-id
 ```
 
 The given event will not be available anymore. The requested service then owns the event. It is the end of the event
 lifecycle.
+
+### Add a job
+
+```bash
+POST /:channel-name/jobs
+HEADER: [ "Content-Type": "application/json" ]
+BODY: {
+  "name": "<a job name, has to be unique (preventing multiple of the same job)>"
+  "data": "<string data (e.g. JSON) which will be shown in the events later on>",
+  "cronDef": "<cronJob or cronTab definition, explained below>"
+}
+```
+
+The name has to be unique, so that you can later stop the job and don't create multiple jobs in a distributed system.
+The data, will be always the same and equals that for the events later on. The `cronDef` parameter is the cronJob or
+cronTab definition and can include the timezone and the actual definition.
+
+Following are some **predefined** schedules, but you can use every normal cronJob definition.
+
+```
+Entry                  | Description                                | Equivalent To
+-----                  | -----------                                | -------------
+@yearly (or @annually) | Run once a year, midnight, Jan. 1st        | 0 0 1 1 *
+@monthly               | Run once a month, midnight, first of month | 0 0 1 * *
+@weekly                | Run once a week, midnight between Sat/Sun  | 0 0 * * 0
+@daily (or @midnight)  | Run once a day, midnight                   | 0 0 * * *
+@hourly                | Run once an hour, beginning of hour        | 0 * * * *
+```
+
+Also, you can specify **intervals** with the following annotation. For example, "@every 1h30m10s" would indicate a
+schedule that activates after 1 hour, 30 minutes, 10 seconds, and then every interval after that.
+
+```
+@every <duration>
+```
+
+**Please notice, that if you don't stop the job and don't pick up (delete) the events, the queue gets infinitely long.
+The events have no Time-to-Life definition yet (will follow in issue #3)!**
+
+### List all jobs
+
+```bash
+GET /:channel-name/jobs
+```
+
+You will receive a list of all jobs, within the channel. If the channel does not exist yet, it will be created.
+
+### Remove a job
+
+```bash
+DELETE /:channel-name/jobs/:job-name
+```
+
+The given job will not be available anymore. The job will not publish events anymore. You can now create a new job with
+the name.

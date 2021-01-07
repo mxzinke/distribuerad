@@ -9,8 +9,10 @@ import (
 )
 
 type Channel struct {
-	events []*domain.Event
-	lock   *sync.RWMutex
+	events   []*domain.Event
+	jobs     map[string]*jobExecution
+	lock     *sync.RWMutex
+	jobsLock *sync.RWMutex
 }
 
 func (c *Channel) GetEvents() []*domain.Event {

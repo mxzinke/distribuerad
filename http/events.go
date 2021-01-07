@@ -19,7 +19,7 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 		}
 		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 			log.Printf("Could not read the request data of new-event request: %v", err)
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
@@ -43,8 +43,8 @@ func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
-		events := eventList{
-			ChannelName: p.ByName("channelName"),
+		events := queue{
+			ChannelName: p.ByName("channel-name"),
 			Events:      channel.GetEvents(),
 		}
 
@@ -60,7 +60,7 @@ func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 func handleDeleteEvent(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		if err := resolveChannelName(store, p).DeleteEvent(p.ByName("event-id")); err != nil {
-			w.WriteHeader(http.StatusGone)
+			errorResponse(w, err, http.StatusGone)
 			return
 		}
 
