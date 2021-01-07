@@ -31,7 +31,7 @@ func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
 	defer c.jobsLock.Unlock()
 
 	if c.jobs[jobID] != nil {
-		return c.jobs[jobID].definition, fmt.Errorf("The job with name %s already exists! ", jobID)
+		return c.jobs[jobID].definition, fmt.Errorf("The job with name '%s' already exists! ", jobID)
 	}
 
 	// add the execution cronJob / intervalJob
@@ -62,7 +62,7 @@ func (c *Channel) DeleteJob(jobID string) error {
 	defer c.jobsLock.Unlock()
 
 	if c.jobs[jobID] == nil {
-		return fmt.Errorf("The job %s does not exist! ", jobID)
+		return fmt.Errorf("The job '%s' does not exist! ", jobID)
 	}
 
 	c.jobs[jobID].runner.Stop()
