@@ -37,15 +37,18 @@ func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
 	execution := cron.New(cron.WithChain(
 		cron.Recover(cron.DefaultLogger),
 	))
-	if _, err := execution.AddFunc(cronDef, func() { c.AddEvent(data) }); err != nil {
+	if _, err := execution.AddFunc(cronDef, func() {
+		c.AddEvent(data)
+	}); err != nil {
 		return nil, fmt.Errorf("Error at cronJob: %v", err)
 	}
+	execution.Start()
 
 	c.jobs[jobID] = &jobExecution{
 		definition: &domain.Job{
-			ID:   jobID,
-			Data: data,
-			Cron: cronDef,
+			ID:      jobID,
+			Data:    data,
+			CronDef: cronDef,
 		},
 		runner: execution,
 	}

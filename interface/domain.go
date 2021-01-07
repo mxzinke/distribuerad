@@ -16,7 +16,7 @@ type IChannel interface {
 
 	// Related to jobs:
 	GetJobs() []*Job
-	AddJob(jobID, data string, every time.Duration) (*Job, error)
+	AddJob(jobID, data, cronDef string) (*Job, error)
 	DeleteJob(jobID string) error
 }
 
@@ -27,8 +27,7 @@ type Event struct {
 }
 
 type Job struct {
-	ID    string        `json:"jobID"`
-	Cron  string        `json:"cron,omitempty"`
-	Every time.Duration `json:"every,omitempty"`
-	Data  string        `json:"data"`
+	ID      string `json:"jobID"`
+	CronDef string `json:"cron,omitempty"`
+	Data    string `json:"data"`
 }

@@ -6,4 +6,5 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/xid v1.2.1
+	github.com/stretchr/testify v1.6.1
 )
