@@ -10,6 +10,8 @@ RUN go build -o build_artifact .
 
 FROM alpine:latest
 
-COPY --from=build /app/build_artifact ./binary
+COPY --from=build /app/build_artifact ./distribuerad
 
-ENTRYPOINT [ "./binary" ]
+EXPOSE 80
+
+CMD [ "./distribuerad" ]
