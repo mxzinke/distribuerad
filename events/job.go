@@ -4,6 +4,7 @@ import (
 	domain "distribuerad/interface"
 	"fmt"
 	"github.com/robfig/cron/v3"
+	"time"
 )
 
 type jobExecution struct {
@@ -46,9 +47,10 @@ func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
 
 	c.jobs[jobID] = &jobExecution{
 		definition: &domain.Job{
-			ID:      jobID,
-			Data:    data,
-			CronDef: cronDef,
+			ID:        jobID,
+			Data:      data,
+			CronDef:   cronDef,
+			CreatedAt: time.Now(),
 		},
 		runner: execution,
 	}

@@ -27,7 +27,8 @@ type Event struct {
 }
 
 type Job struct {
-	ID      string `json:"jobID"`
-	CronDef string `json:"cron,omitempty"`
-	Data    string `json:"data"`
+	ID        string    `json:"jobID"`
+	CronDef   string    `json:"cron,omitempty"`
+	Data      string    `json:"data"`
+	CreatedAt time.Time `json:"createdAt"`
 }
