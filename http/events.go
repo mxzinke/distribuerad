@@ -14,8 +14,9 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 		channel := resolveChannelName(store, p)
 
 		var event struct {
-			Data      string    `json:"data"`
-			PublishAt time.Time `json:"publishAt,omitempty"`
+			Data      string        `json:"data"`
+			PublishAt time.Time     `json:"publishAt,omitempty"`
+			TTL       time.Duration `json:"ttl,omitempty"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 			log.Printf("Could not read the request data of new-event request: %v", err)
@@ -25,9 +26,9 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 
 		var newEvent *domain.Event
 		if event.PublishAt.IsZero() {
-			newEvent = channel.AddEvent(event.Data)
+			newEvent = channel.AddEvent(event.Data, event.TTL)
 		} else {
-			newEvent = channel.AddDelayedEvent(event.Data, event.PublishAt)
+			newEvent = channel.AddDelayedEvent(event.Data, event.PublishAt, event.TTL)
 		}
 
 		w.Header().Set("Content-Type", "application/json")

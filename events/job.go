@@ -26,7 +26,7 @@ func (c *Channel) GetJobs() []*domain.Job {
 	return currentJobs
 }
 
-func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
+func (c *Channel) AddJob(jobID, data, cronDef string, ttl time.Duration) (*domain.Job, error) {
 	c.jobsLock.Lock()
 	defer c.jobsLock.Unlock()
 
@@ -39,7 +39,7 @@ func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
 		cron.Recover(cron.DefaultLogger),
 	))
 	if _, err := execution.AddFunc(cronDef, func() {
-		c.AddEvent(data)
+		c.AddEvent(data, ttl)
 	}); err != nil {
 		return nil, fmt.Errorf("Error at cronJob: %v", err)
 	}
@@ -51,6 +51,7 @@ func (c *Channel) AddJob(jobID, data, cronDef string) (*domain.Job, error) {
 			Data:      data,
 			CronDef:   cronDef,
 			CreatedAt: time.Now(),
+			TTL:       ttl,
 		},
 		runner: execution,
 	}

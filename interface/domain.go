@@ -10,13 +10,13 @@ type IChannelStore interface {
 
 type IChannel interface {
 	GetEvents() []*Event
-	AddEvent(data string) *Event
-	AddDelayedEvent(data string, publishAt time.Time) *Event
+	AddEvent(data string, duration time.Duration) *Event
+	AddDelayedEvent(data string, publishAt time.Time, ttl time.Duration) *Event
 	DeleteEvent(eventID string) error
 
 	// Related to jobs:
 	GetJobs() []*Job
-	AddJob(jobID, data, cronDef string) (*Job, error)
+	AddJob(jobID, data, cronDef string, ttl time.Duration) (*Job, error)
 	DeleteJob(jobID string) error
 }
 
@@ -24,11 +24,13 @@ type Event struct {
 	ID          string    `json:"eventID"`
 	PublishedAt time.Time `json:"publishedAt"`
 	Data        string    `json:"data"`
+	LivesUntil  time.Time `json:"livesUntil"`
 }
 
 type Job struct {
-	ID        string    `json:"jobID"`
-	CronDef   string    `json:"cron,omitempty"`
-	Data      string    `json:"data"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID        string        `json:"jobID"`
+	CronDef   string        `json:"cron"`
+	Data      string        `json:"data"`
+	TTL       time.Duration `json:"ttl"`
+	CreatedAt time.Time     `json:"createdAt"`
 }

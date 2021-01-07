@@ -57,6 +57,8 @@ BODY: {
   "data": "<string data (e.g. JSON) which will be shown in the event>",
   # Parameter is used to add a Delayed-Event:
   "publishAt": "<In ISO-8601 format, if not given it will publish immediately>"
+  # (OPTIONAL) Time-to-Live (default: 10minutes)
+  "ttl": "<after which duration the event should be removed>"
 }
 ```
 
@@ -86,6 +88,8 @@ BODY: {
   "name": "<a job name, has to be unique (preventing multiple of the same job)>"
   "data": "<string data (e.g. JSON) which will be shown in the events later on>",
   "cronDef": "<cronJob or cronTab definition, explained below>"
+  # (OPTIONAL) Time-to-Live (default: 10minutes)
+  "ttl": "<after which duration the event should be removed>"
 }
 ```
 
@@ -111,9 +115,6 @@ schedule that activates after 1 hour, 30 minutes, 10 seconds, and then every int
 ```
 @every <duration>
 ```
-
-**Please notice, that if you don't stop the job and don't pick up (delete) the events, the queue gets infinitely long.
-The events have no Time-to-Life definition yet (will follow in issue #3)!**
 
 ### List all jobs
 

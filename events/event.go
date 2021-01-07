@@ -15,6 +15,8 @@ type Channel struct {
 	jobsLock *sync.RWMutex
 }
 
+const defaultTTL = 10 * time.Minute
+
 func (c *Channel) GetEvents() []*domain.Event {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -22,25 +24,38 @@ func (c *Channel) GetEvents() []*domain.Event {
 	return c.events
 }
 
-func (c *Channel) AddEvent(data string) *domain.Event {
+func (c *Channel) AddEvent(data string, ttl time.Duration) *domain.Event {
 	c.lock.Lock()
 	defer c.lock.Unlock()
+
+	if ttl == 0 {
+		ttl = defaultTTL
+	}
+
+	if ttl == 0 {
+		ttl = defaultTTL
+	}
 
 	event := &domain.Event{
 		ID:          xid.New().String(),
 		PublishedAt: time.Now(),
 		Data:        data,
+		LivesUntil:  time.Now().Add(ttl),
 	}
 
 	c.events = append(c.events, event)
 	return event
 }
 
-func (c *Channel) AddDelayedEvent(data string, publishAt time.Time) *domain.Event {
+func (c *Channel) AddDelayedEvent(data string, publishAt time.Time, ttl time.Duration) *domain.Event {
+	if ttl == 0 {
+		ttl = defaultTTL
+	}
 	event := &domain.Event{
 		ID:          xid.New().String(),
 		PublishedAt: publishAt,
 		Data:        data,
+		LivesUntil:  publishAt.Add(ttl),
 	}
 
 	time.AfterFunc(publishAt.Sub(time.Now()), func() {
