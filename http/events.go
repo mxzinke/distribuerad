@@ -3,6 +3,7 @@ package events_http
 import (
 	"distribuerad/interface"
 	"encoding/json"
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -14,9 +15,9 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 		channel := resolveChannelName(store, p)
 
 		var event struct {
-			Data      string        `json:"data"`
-			PublishAt time.Time     `json:"publishAt,omitempty"`
-			TTL       time.Duration `json:"ttl,omitempty"`
+			Data      string    `json:"data"`
+			PublishAt time.Time `json:"publishAt,omitempty"`
+			TTL       string    `json:"ttl,omitempty"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
 			log.Printf("Could not read the request data of new-event request: %v", err)
@@ -24,11 +25,17 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 			return
 		}
 
+		ttl, err := time.ParseDuration(event.TTL)
+		if err != nil {
+			errorResponse(w, fmt.Errorf("Parameter 'ttl' should be in a duration format (e.g. '1h30m10s')!"),
+				http.StatusBadRequest)
+		}
+
 		var newEvent *domain.Event
 		if event.PublishAt.IsZero() {
-			newEvent = channel.AddEvent(event.Data, event.TTL)
+			newEvent = channel.AddEvent(event.Data, ttl)
 		} else {
-			newEvent = channel.AddDelayedEvent(event.Data, event.PublishAt, event.TTL)
+			newEvent = channel.AddDelayedEvent(event.Data, event.PublishAt, ttl)
 		}
 
 		w.Header().Set("Content-Type", "application/json")

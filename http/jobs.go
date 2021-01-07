@@ -15,10 +15,10 @@ func handleCreateNewJob(store domain.IChannelStore) httprouter.Handle {
 		channel := resolveChannelName(store, p)
 
 		var job struct {
-			Name    string        `json:"name"`
-			Data    string        `json:"data"`
-			CronDef string        `json:"cronDef"`
-			TTL     time.Duration `json:"ttl,omitempty"`
+			Name    string `json:"name"`
+			Data    string `json:"data"`
+			CronDef string `json:"cronDef"`
+			TTL     string `json:"ttl,omitempty"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&job); err != nil {
 			log.Printf("Could not read the request data of new-event request: %v", err)
@@ -33,7 +33,13 @@ func handleCreateNewJob(store domain.IChannelStore) httprouter.Handle {
 			return
 		}
 
-		newJob, err := channel.AddJob(job.Name, job.Data, job.CronDef, job.TTL)
+		ttl, err := time.ParseDuration(job.TTL)
+		if err != nil {
+			errorResponse(w, fmt.Errorf("Parameter 'ttl' should be in a duration format (e.g. '1h30m10s')!"),
+				http.StatusBadRequest)
+		}
+
+		newJob, err := channel.AddJob(job.Name, job.Data, job.CronDef, ttl)
 		if err != nil {
 			errorResponse(w, err, http.StatusConflict)
 			return
