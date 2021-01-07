@@ -21,7 +21,14 @@ func (c *Channel) GetEvents() []*domain.Event {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	return c.events
+	validEvents := c.getValidEvents()
+
+	// in case, there are invalid elements
+	if len(c.events) > len(validEvents) {
+		defer c.cleanupInvalidEvents()
+	}
+
+	return validEvents
 }
 
 func (c *Channel) AddEvent(data string, ttl time.Duration) *domain.Event {
@@ -90,4 +97,24 @@ func (c *Channel) DeleteEvent(eventID string) error {
 	}
 
 	return nil
+}
+
+// Please lock the
+func (c *Channel) getValidEvents() []*domain.Event {
+	var validEvents []*domain.Event
+	now := time.Now()
+
+	for _, event := range c.events {
+		if event.LivesUntil.After(now) {
+			validEvents = append(validEvents, event)
+		}
+	}
+
+	return validEvents
+}
+
+func (c *Channel) cleanupInvalidEvents() {
+	c.lock.Lock()
+	c.events = c.getValidEvents()
+	c.lock.Unlock()
 }
