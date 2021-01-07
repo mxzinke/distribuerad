@@ -27,7 +27,7 @@ func (c *Channel) GetEvents() []*domain.Event {
 
 	// in case, there are invalid elements
 	if len(c.events) > len(validEvents) {
-		defer c.cleanupInvalidEvents()
+		go c.cleanupInvalidEvents()
 	}
 
 	return validEvents
