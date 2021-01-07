@@ -3,6 +3,7 @@ package events
 import (
 	"distribuerad/interface"
 	"fmt"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/xid"
 	"sync"
 	"time"
@@ -13,6 +14,7 @@ type Channel struct {
 	jobs     map[string]*jobExecution
 	lock     *sync.RWMutex
 	jobsLock *sync.RWMutex
+	cleanup  *cron.Cron
 }
 
 const defaultTTL = 10 * time.Minute
