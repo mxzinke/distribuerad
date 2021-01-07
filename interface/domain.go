@@ -16,9 +16,8 @@ type IChannel interface {
 
 	// Related to jobs:
 	GetJobs() []*Job
-	AddJob(jobID, data string, every time.Duration) *Job
-	AddCronJob(jobID, data, cronDef string) *Job
-	DeleteJob(jobID string)
+	AddJob(jobID, data string, every time.Duration) (*Job, error)
+	DeleteJob(jobID string) error
 }
 
 type Event struct {
