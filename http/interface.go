@@ -6,6 +6,7 @@ import (
 
 type queue struct {
 	ChannelName string          `json:"channelName"`
+	Count       int             `json:"count"`
 	Events      []*domain.Event `json:"events"`
 }
 

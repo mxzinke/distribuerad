@@ -43,9 +43,11 @@ func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
+		eventList := channel.GetEvents()
 		events := queue{
 			ChannelName: p.ByName("channel-name"),
-			Events:      channel.GetEvents(),
+			Count:       len(eventList),
+			Events:      eventList,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
