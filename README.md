@@ -23,21 +23,6 @@ You can use the Docker-Image, which you can find [here](https://hub.docker.com/r
 or by cloning the repo and building it yourself. You are allowed to use the image as a container in a Kubernetes-Cluster
 or Development.
 
-## What about performance?
-
-I did a test creating 30 jobs (with each 1 message/second), and some messages simulated by a simple script, creating
-additionally 30 messages/second and picking up around 60 messages/second. Everything running in a docker container of
-image `mxzinke/distribuerad:latest`.
-
-The result from `docker stats` on MacBook (Intel i5):
-
-```
-CONTAINER ID   NAME               CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
-f8807181c438   distribuerad_1     0.12%     7.91MiB / 3.847GiB    0.12%     86.2kB / 9.87MB   0B / 0B           27
-```
-
-To not for get, it does already store around **20k messages** over 2 channels.
-
 ## Concept
 
 It's very easy. We separate in our concept into three types of objectives which you can spawn:
@@ -166,3 +151,18 @@ DELETE /:channel-name/jobs/:job-name
 
 The given job will not be available anymore. The job will not publish events anymore. You can now create a new job with
 the name.
+
+## What about performance?
+
+I did a test creating 30 jobs (with each 1 message/second), and some messages simulated by a simple script, creating
+additionally 30 messages/second and picking up around 60 messages/second. Everything running in a docker container of
+image `mxzinke/distribuerad:latest`.
+
+The result from `docker stats` on MacBook (Intel i5):
+
+```
+CONTAINER ID   NAME               CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
+f8807181c438   distribuerad_1     0.12%     7.91MiB / 3.847GiB    0.12%     86.2kB / 9.87MB   0B / 0B           27
+```
+
+To not for get, it does already store around **20k messages** over 2 channels.
