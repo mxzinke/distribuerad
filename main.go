@@ -9,7 +9,7 @@ import (
 
 var (
 	address = flag.String("address", "0.0.0.0", "To set the address which binds the server")
-	port    = flag.Int("port", 80, "To set the port, where the server starts")
+	port    = flag.Int("port", 3333, "To set the port, where the server starts")
 )
 
 func init() {

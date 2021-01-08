@@ -12,6 +12,6 @@ FROM alpine:latest
 
 COPY --from=build /app/build_artifact ./distribuerad
 
-EXPOSE 80
+EXPOSE 3333
 
 CMD [ "./distribuerad" ]
