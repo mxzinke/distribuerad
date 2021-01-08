@@ -1,7 +1,7 @@
 package events_http
 
 import (
-	"distribuerad/interface"
+	"distribuerad/core"
 )
 
 type queue struct {

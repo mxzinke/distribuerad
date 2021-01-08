@@ -1,7 +1,7 @@
 package events
 
 import (
-	"distribuerad/interface"
+	"distribuerad/core"
 	"fmt"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/xid"

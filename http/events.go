@@ -1,7 +1,7 @@
 package events_http
 
 import (
-	"distribuerad/interface"
+	"distribuerad/core"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"

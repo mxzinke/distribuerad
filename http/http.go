@@ -1,7 +1,7 @@
 package events_http
 
 import (
-	domain "distribuerad/interface"
+	domain "distribuerad/core"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"

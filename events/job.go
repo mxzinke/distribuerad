@@ -1,7 +1,7 @@
 package events
 
 import (
-	domain "distribuerad/interface"
+	domain "distribuerad/core"
 	"fmt"
 	"github.com/robfig/cron/v3"
 	"time"

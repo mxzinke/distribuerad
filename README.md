@@ -26,18 +26,19 @@ or Development.
 ## What about performance?
 
 I did a test creating 30 jobs (with each 1 message/second), and some messages simulated by a simple script, creating
-additionally 30 messages/second and picking up around 60 messages/second. Everything running in a docker
-container of image `mxzinke/distribuerad:latest`.
+additionally 30 messages/second and picking up around 60 messages/second. Everything running in a docker container of
+image `mxzinke/distribuerad:latest`.
 
 The result from `docker stats` on MacBook (Intel i5):
+
 ```
 CONTAINER ID   NAME               CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O         PIDS
 f8807181c438   distribuerad_1     0.12%     7.91MiB / 3.847GiB    0.12%     86.2kB / 9.87MB   0B / 0B           27
 ```
 
-To not forget, it does already store around **20k messages** over 2 channels.
+To not for get, it does already store around **20k messages** over 2 channels.
 
-## How to use it?
+## Concept
 
 It's very easy. We separate in our concept into three types of objectives which you can spawn:
 
@@ -45,7 +46,12 @@ It's very easy. We separate in our concept into three types of objectives which 
 * Delayed Events - Messages which will be published to the queue at a given point-of-time
 * Jobs - Recurring messages, defined by cronJob / cronTab definitions
 
-### Add an events (Events + Delayed Events)
+## The event / message lifecycle
+
+The following steps shows the lifecycle of an element, which you can work with. The lifecycle is the same for 
+delayed events and normal events.
+
+### 1. Add an events (Events + Delayed Events)
 
 Using the following endpoint, you can create a new event in a channel. You don't have to handle, about creating the
 channel.
@@ -62,7 +68,7 @@ BODY: {
 }
 ```
 
-### The queue
+### 2. Receive the queue
 
 ```bash
 GET /:channel-name/events
@@ -70,14 +76,42 @@ GET /:channel-name/events
 
 You will receive the complete queue, within the channel. If the channel does not exist yet, it will be created.
 
-### Remove an event / Message
+### 3. Acquire an event / message
+
+To prevent, that any other client is taking up this event, the event will be acquired, just for this service. Also, it
+is possible to unlock the event (in case the client could not work on it and want to put it back in the queue).
+*The system does not force to lock the event, before removing it from the queue.*
+
+If multiple clients requesting `LOCK` on the same event, the first client trying it, will get the lock. All clients
+after, will fail with response status 410 (Gone).
+
+```bash
+PUT /:channel-name/events/:event-id
+HEADER: [ "Content-Type": "application/json" ]
+BODY: {
+  # default value is LOCK, only LOCK and UNLOCK possible
+  "action": "<LOCK | UNLOCK>"
+  # default are 1 minute:
+  "ttl": "<duration, tells about how long the lock lasts>"
+}
+```
+
+### 4. Remove an event / Message
 
 ```bash
 DELETE /:channel-name/events/:event-id
 ```
 
-The given event will not be available anymore. The requested service then owns the event. It is the end of the event
-lifecycle.
+Before doing this, the client normally acquired the event and worked on it. The given event will not be available
+anymore. It is the end of the event lifecycle. It is not required to acquire the event.
+
+## (Cron-) Jobs
+
+As already explained in the concept, jobs does allow it to add events within a cron-job, managed by Distribuerad. 
+This explicitly make sense, if you have a task to do in you distributed (multi-service) system, which you want to 
+make fault-tolerant and prevent executing the same task on every node (in case the services are scaled horizontal).
+
+In following points, there are the possible endpoints for managing jobs explained.
 
 ### Add a job
 

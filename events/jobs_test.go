@@ -15,7 +15,7 @@ func TestIntervalJobLifecycle(t *testing.T) {
 	assert.Empty(t, channel.GetJobs(), "should not have any job in channel yet")
 
 	// Adding a interval-job (every 1 second)
-	job, err := channel.AddJob(testJobName, "EVENT_DATA", "@every 1s")
+	job, err := channel.AddJob(testJobName, "EVENT_DATA", "@every 1s", 0)
 	assert.Nil(t, err, "should not have an error")
 	assert.NotNil(t, job, "should return pointer of job")
 

@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type IChannelStore interface {
 	GetChannel(name string) IChannel
@@ -18,13 +20,6 @@ type IChannel interface {
 	GetJobs() []*Job
 	AddJob(jobID, data, cronDef string, ttl time.Duration) (*Job, error)
 	DeleteJob(jobID string) error
-}
-
-type Event struct {
-	ID          string    `json:"eventID"`
-	PublishedAt time.Time `json:"publishedAt"`
-	Data        string    `json:"data"`
-	LivesUntil  time.Time `json:"livesUntil"`
 }
 
 type Job struct {
