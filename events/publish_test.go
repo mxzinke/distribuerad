@@ -13,7 +13,7 @@ func BenchmarkPublishOneChannel(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		channel.AddEvent("HELLO1234-Event")
+		channel.AddEvent("HELLO1234-Event", 0)
 	}
 }
 
@@ -27,7 +27,7 @@ func BenchmarkMultiPublishAtOneChannel(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		go func() {
-			channel.AddEvent("HELLO1234-Event")
+			channel.AddEvent("HELLO1234-Event", 0)
 			wg.Done()
 		}()
 	}
@@ -66,7 +66,7 @@ func benchmarkPublishNChannels(n int, b *testing.B) {
 
 func benchmarkAtChannel(channel domain.IChannel, wg *sync.WaitGroup, nEvents int) {
 	for i := 0; i < nEvents; i++ {
-		channel.AddEvent("HELLO1234-Event")
+		channel.AddEvent("HELLO1234-Event", 0)
 	}
 	wg.Done()
 }
