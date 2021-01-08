@@ -15,8 +15,8 @@ type Event struct {
 	IsLocked    bool      `json:"isLocked"`
 
 	// Private for managing IsLocked state
-	L *sync.Mutex
-	T *time.Timer
+	L *sync.Mutex `json:"-"`
+	T *time.Timer `json:"-"`
 }
 
 const DefaultEventLockTTL = 1 * time.Minute

@@ -71,7 +71,7 @@ If multiple clients requesting `LOCK` on the same event, the first client trying
 after, will fail with response status 410 (Gone).
 
 ```bash
-PUT /:channel-name/events/:event-id
+PATCH /:channel-name/events/:event-id
 HEADER: [ "Content-Type": "application/json" ]
 BODY: {
   # default value is LOCK, only LOCK and UNLOCK possible

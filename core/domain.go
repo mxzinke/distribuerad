@@ -14,6 +14,7 @@ type IChannel interface {
 	GetEvents() []*Event
 	AddEvent(data string, duration time.Duration) *Event
 	AddDelayedEvent(data string, publishAt time.Time, ttl time.Duration) *Event
+	SetEventLock(eventID string, shouldBeLocked bool, ttl time.Duration) error
 	DeleteEvent(eventID string) error
 
 	// Related to jobs:

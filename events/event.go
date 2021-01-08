@@ -76,18 +76,28 @@ func (c *Channel) AddDelayedEvent(data string, publishAt time.Time, ttl time.Dur
 	return event
 }
 
+func (c *Channel) SetEventLock(eventID string, shouldBeLocked bool, ttl time.Duration) error {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	index := c.findEventIndex(eventID)
+	if index == -1 {
+		return fmt.Errorf("No event could be found with ID %s. Maybe it has already been picked up. ", eventID)
+	}
+
+	if shouldBeLocked {
+		return c.events[index].Lock(ttl)
+	}
+
+	c.events[index].Unlock()
+	return nil
+}
+
 func (c *Channel) DeleteEvent(eventID string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var index = -1
-	for i, e := range c.events {
-		if e.ID == eventID {
-			index = i
-			break
-		}
-	}
-
+	index := c.findEventIndex(eventID)
 	if index == -1 {
 		return fmt.Errorf("No event could be found with ID %s. Maybe it has already been picked up.", eventID)
 	}
@@ -101,7 +111,7 @@ func (c *Channel) DeleteEvent(eventID string) error {
 	return nil
 }
 
-// Please lock the
+// Please use the lock before calling the function!
 func (c *Channel) getValidEvents() []*domain.Event {
 	var validEvents []*domain.Event
 	now := time.Now()
@@ -113,6 +123,20 @@ func (c *Channel) getValidEvents() []*domain.Event {
 	}
 
 	return validEvents
+}
+
+// Please use the lock before calling the function!
+// Will return -1 if it could not find the event
+func (c *Channel) findEventIndex(eventID string) int {
+	var index = -1
+	for i, e := range c.getValidEvents() {
+		if e.ID == eventID {
+			index = i
+			break
+		}
+	}
+
+	return index
 }
 
 func (c *Channel) cleanupInvalidEvents() {

@@ -3,7 +3,6 @@ package events_http
 import (
 	"distribuerad/core"
 	"encoding/json"
-	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
@@ -14,28 +13,28 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
-		var event struct {
+		var payload struct {
 			Data      string    `json:"data"`
 			PublishAt time.Time `json:"publishAt,omitempty"`
 			TTL       string    `json:"ttl,omitempty"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 			log.Printf("Could not read the request data of new-event request: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		ttl, err := time.ParseDuration(event.TTL)
+		ttl, err := parseOptionalDuration(payload.TTL)
 		if err != nil {
-			errorResponse(w, fmt.Errorf("Parameter 'ttl' should be in a duration format (e.g. '1h30m10s')!"),
-				http.StatusBadRequest)
+			errorResponse(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		var newEvent *domain.Event
-		if event.PublishAt.IsZero() {
-			newEvent = channel.AddEvent(event.Data, ttl)
+		if payload.PublishAt.IsZero() {
+			newEvent = channel.AddEvent(payload.Data, ttl)
 		} else {
-			newEvent = channel.AddDelayedEvent(event.Data, event.PublishAt, ttl)
+			newEvent = channel.AddDelayedEvent(payload.Data, payload.PublishAt, ttl)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -67,10 +66,50 @@ func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
 	}
 }
 
+const (
+	lockAction   = "LOCK"
+	unlockAction = "UNLOCK"
+)
+
+func handleLockEvent(store domain.IChannelStore) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		channel := resolveChannelName(store, p)
+
+		var payload struct {
+			Action string `json:"action"`
+			TTL    string `json:"ttl,omitempty"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			log.Printf("Could not read the request data of new-event request: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if payload.Action != lockAction && payload.Action != unlockAction {
+			errorResponse(w, "Parameter 'action' can only have values 'LOCK' or 'UNLOCK'!",
+				http.StatusBadRequest)
+			return
+		}
+
+		ttl, err := parseOptionalDuration(payload.TTL)
+		if err != nil {
+			errorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := channel.SetEventLock(p.ByName("event-id"), payload.Action == lockAction, ttl); err != nil {
+			errorResponse(w, err.Error(), http.StatusGone)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	}
+}
+
 func handleDeleteEvent(store domain.IChannelStore) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		if err := resolveChannelName(store, p).DeleteEvent(p.ByName("event-id")); err != nil {
-			errorResponse(w, err, http.StatusGone)
+			errorResponse(w, err.Error(), http.StatusNotFound)
 			return
 		}
 
