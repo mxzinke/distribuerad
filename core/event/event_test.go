@@ -8,8 +8,8 @@ import (
 
 func TestEventLock(t *testing.T) {
 	e := &Event{
-		ID:          "123",
-		PublishedAt: time.Now(),
+		EventID:     "123",
+		PublishTime: time.Now(),
 		Data:        "TEST_TEST_1234",
 	}
 
@@ -27,23 +27,24 @@ func TestEventLock(t *testing.T) {
 
 func TestEventLockExpire(t *testing.T) {
 	e := &Event{
-		ID:          "123",
-		PublishedAt: time.Now(),
+		EventID:     "123",
+		PublishTime: time.Now(),
 		Data:        "TEST_TEST_1234",
 	}
+	ttl := 200 * time.Microsecond
 
-	err := e.Lock(200 * time.Microsecond)
+	err := e.Lock(ttl)
 	assert.Nil(t, err, "should not throw an error")
 	assert.True(t, e.IsLocked, "should be locked")
 
-	time.Sleep(200 * time.Microsecond)
+	time.Sleep(ttl)
 	assert.False(t, e.IsLocked, "should not be locked anymore")
 }
 
 func TestEventLockExpireOn0TTL(t *testing.T) {
 	e := &Event{
-		ID:          "123",
-		PublishedAt: time.Now(),
+		EventID:     "123",
+		PublishTime: time.Now(),
 		Data:        "TEST_TEST_1234",
 	}
 
@@ -57,8 +58,8 @@ func TestEventLockExpireOn0TTL(t *testing.T) {
 
 func TestEventUnlockOnUnlocked(t *testing.T) {
 	e := &Event{
-		ID:          "123",
-		PublishedAt: time.Now(),
+		EventID:     "123",
+		PublishTime: time.Now(),
 		Data:        "TEST_TEST_1234",
 	}
 
