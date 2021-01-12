@@ -1,19 +1,40 @@
 package core
 
-/*
-func BenchmarkPublishOneChannel(b *testing.B) {
-	channelStore := NewChannelStore()
-	channel := channelStore.AddChannel("test")
+import (
+	"fmt"
+	"sync"
+	"testing"
+	"time"
+)
+
+func BenchmarkQueueWith1000Events(b *testing.B) {
+	c := Init()
+	channelName := "test-channel"
+
+	amountElem := 1000
+	for i := 0; i < amountElem; i++ {
+		c.AddChannelEvent(channelName, "Test_data", 0, time.Now())
+	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		channel.AddEvent("HELLO1234-Event", 0)
+		c.ChannelQueue(channelName)
+	}
+}
+
+func BenchmarkPublishOneChannel(b *testing.B) {
+	c := Init()
+	channelName := "test-channel"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		c.AddChannelEvent(channelName, "Test_data", 0, time.Now())
 	}
 }
 
 func BenchmarkMultiPublishAtOneChannel(b *testing.B) {
-	channelStore := NewChannelStore()
-	channel := channelStore.AddChannel("test")
+	c := Init()
+	channelName := "test-channel"
 
 	wg := sync.WaitGroup{}
 	wg.Add(b.N)
@@ -21,7 +42,7 @@ func BenchmarkMultiPublishAtOneChannel(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		go func() {
-			channel.AddEvent("HELLO1234-Event", 0)
+			c.AddChannelEvent(channelName, "Test_data", 0, time.Now())
 			wg.Done()
 		}()
 	}
@@ -41,27 +62,23 @@ func BenchmarkPublish10Channels(b *testing.B) {
 }
 
 func benchmarkPublishNChannels(n int, b *testing.B) {
-	channelStore := NewChannelStore()
+	c := Init()
 	wg := sync.WaitGroup{}
 	wg.Add(n)
-	var channels []domain.IChannel
+	var channels []string
 	for i := 0; i < n; i++ {
-		channels = append(channels, channelStore.AddChannel(fmt.Sprintf("test-%d", n)))
+		channels = append(channels, fmt.Sprintf("test-%d", n))
 	}
-
 	everyChannelEvents := b.N / n
 
 	b.ResetTimer()
 	for _, channel := range channels {
-		go benchmarkAtChannel(channel, &wg, everyChannelEvents)
+		go func(channelName string) {
+			for i := 0; i < everyChannelEvents; i++ {
+				c.AddChannelEvent(channelName, "Test_data", 0, time.Now())
+			}
+			wg.Done()
+		}(channel)
 	}
 	wg.Wait()
 }
-
-func benchmarkAtChannel(channel domain.IChannel, wg *sync.WaitGroup, nEvents int) {
-	for i := 0; i < nEvents; i++ {
-		channel.AddEvent("HELLO1234-Event", 0)
-	}
-	wg.Done()
-}
-*/
