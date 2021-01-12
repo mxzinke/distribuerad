@@ -66,7 +66,15 @@ func (c *Core) ChannelJobs(channelName string) []*job.Job {
 }
 
 func (c *Core) AddChannelJob(channelName, jobID, data, cronDef string, eventTTL time.Duration) (*job.Job, error) {
-	j, err := c.findChannel(channelName).AddJob(job.New(jobID, data, cronDef, eventTTL))
+	ch := c.findChannel(channelName)
+	j, err := ch.AddJob(job.New(jobID, data, cronDef, eventTTL))
+	if err != nil {
+		return nil, err
+	}
+
+	j.SetTrigger(func(data string, ttl time.Duration) {
+		ch.AddEvent(event.New(data, time.Now(), ttl))
+	})
 	return j.(*job.Job), err
 }
 
