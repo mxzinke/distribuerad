@@ -1,12 +1,6 @@
-package events
+package core
 
-import (
-	domain "distribuerad/core"
-	"fmt"
-	"sync"
-	"testing"
-)
-
+/*
 func BenchmarkPublishOneChannel(b *testing.B) {
 	channelStore := NewChannelStore()
 	channel := channelStore.AddChannel("test")
@@ -70,3 +64,4 @@ func benchmarkAtChannel(channel domain.IChannel, wg *sync.WaitGroup, nEvents int
 	}
 	wg.Done()
 }
+*/
