@@ -16,6 +16,15 @@ type Channel struct {
 	cleanup  *cron.Cron
 }
 
+func New(name string) *Channel {
+	return &Channel{
+		name:     name,
+		jobs:     map[string]IJob{},
+		lock:     &sync.RWMutex{},
+		jobsLock: &sync.RWMutex{},
+	}
+}
+
 func (c *Channel) Name() string {
 	return c.name
 }
@@ -37,7 +46,9 @@ func (c *Channel) OnAttach() {
 
 // An action which is performed before removing from a store
 func (c *Channel) OnDetach() {
-	c.cleanup.Stop()
+	if c.cleanup != nil {
+		c.cleanup.Stop()
+	}
 }
 
 // --- Private ---

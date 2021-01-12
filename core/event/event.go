@@ -9,10 +9,10 @@ import (
 )
 
 type Event struct {
-	ID          string    `json:"eventID"`
-	PublishedAt time.Time `json:"publishedAt"`
+	EventID     string    `json:"eventID"`
+	PublishTime time.Time `json:"publishedAt"`
 	Data        string    `json:"data"`
-	ValidUntil  time.Time `json:"validUntil"`
+	LivesUntil  time.Time `json:"validUntil"`
 	IsLocked    bool      `json:"isLocked"`
 
 	// Private for managing IsLocked state
@@ -32,11 +32,21 @@ func New(data string, publishAt time.Time, ttl time.Duration) *Event {
 	}
 
 	return &Event{
-		ID:          xid.New().String(),
-		PublishedAt: publishAt,
+		EventID:     xid.New().String(),
+		PublishTime: publishAt,
 		Data:        data,
-		ValidUntil:  publishAt.Add(ttl),
+		LivesUntil:  publishAt.Add(ttl),
 	}
+}
+
+func (e *Event) ID() string {
+	return e.EventID
+}
+func (e *Event) ValidUntil() time.Time {
+	return e.LivesUntil
+}
+func (e *Event) PublishedAt() time.Time {
+	return e.PublishTime
 }
 
 func (e *Event) Lock(ttl time.Duration) error {
