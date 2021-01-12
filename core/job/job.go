@@ -16,11 +16,8 @@ type Job struct {
 
 	// For internal processes
 	cronJob *cron.Cron
-	trigger TriggerFunc
+	trigger func(data string, ttl time.Duration)
 }
-
-// TriggerFunc is a shortcut for a function providing event-data, used for the job trigger
-type TriggerFunc func(data string, ttl time.Duration)
 
 func New(jobID, data, cronDef string, eventTTL time.Duration) *Job {
 	return &Job{
@@ -36,7 +33,7 @@ func (j *Job) ID() string {
 	return j.JobID
 }
 
-func (j *Job) SetTrigger(trigger TriggerFunc) {
+func (j *Job) SetTrigger(trigger func(data string, ttl time.Duration)) {
 	j.trigger = trigger
 }
 
