@@ -8,7 +8,7 @@ import (
 
 // Job describes a Cron-/Interval Job doing an action each time it triggers
 type Job struct {
-	ID        string        `json:"jobID"`
+	JobID     string        `json:"jobID"`
 	CronDef   string        `json:"cron"`
 	Data      string        `json:"data"`
 	TTL       time.Duration `json:"ttl"`
@@ -24,12 +24,20 @@ type TriggerFunc func(data string, ttl time.Duration)
 
 func New(jobID, data, cronDef string, eventTTL time.Duration) *Job {
 	return &Job{
-		ID:        jobID,
+		JobID:     jobID,
 		CronDef:   cronDef,
 		Data:      data,
 		TTL:       eventTTL,
 		CreatedAt: time.Now(),
 	}
+}
+
+func (j *Job) ID() string {
+	return j.JobID
+}
+
+func (j *Job) SetTrigger(trigger TriggerFunc) {
+	j.trigger = trigger
 }
 
 func (j *Job) OnAttach() {
