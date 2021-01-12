@@ -5,7 +5,7 @@ import (
 )
 
 type IChannel interface {
-	GetName() string
+	Name() string
 
 	// Reactions
 	OnAttach()
@@ -37,7 +37,7 @@ func (store *ChannelStore) AddChannel(channel IChannel) IChannel {
 	store.lock.Lock()
 	defer store.lock.Unlock()
 
-	name := channel.GetName()
+	name := channel.Name()
 	if store.channels[name] != nil {
 		return store.channels[name]
 	}
