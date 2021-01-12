@@ -1,8 +1,9 @@
-package domain
+package event
 
 import (
 	"errors"
 	"fmt"
+	"github.com/rs/xid"
 	"sync"
 	"time"
 )
@@ -11,7 +12,7 @@ type Event struct {
 	ID          string    `json:"eventID"`
 	PublishedAt time.Time `json:"publishedAt"`
 	Data        string    `json:"data"`
-	LivesUntil  time.Time `json:"livesUntil"`
+	ValidUntil  time.Time `json:"validUntil"`
 	IsLocked    bool      `json:"isLocked"`
 
 	// Private for managing IsLocked state
@@ -19,7 +20,24 @@ type Event struct {
 	T *time.Timer `json:"-"`
 }
 
+const DefaultTTL = 10 * time.Minute
 const DefaultEventLockTTL = 1 * time.Minute
+
+func New(data string, publishAt time.Time, ttl time.Duration) *Event {
+	if ttl == 0 {
+		ttl = DefaultTTL
+	}
+	if publishAt.IsZero() {
+		publishAt = time.Now()
+	}
+
+	return &Event{
+		ID:          xid.New().String(),
+		PublishedAt: publishAt,
+		Data:        data,
+		ValidUntil:  publishAt.Add(ttl),
+	}
+}
 
 func (e *Event) Lock(ttl time.Duration) error {
 	L := e.createL()
