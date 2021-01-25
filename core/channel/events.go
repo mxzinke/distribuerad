@@ -9,9 +9,6 @@ type IEvent interface {
 	ID() string
 	PublishedAt() time.Time
 	ValidUntil() time.Time
-
-	Lock(ttl time.Duration) error
-	Unlock()
 }
 
 func (c *Channel) GetEvents() []IEvent {
@@ -42,7 +39,7 @@ func (c *Channel) GetEvent(eventID string) IEvent {
 }
 
 func (c *Channel) AddEvent(event IEvent) IEvent {
-	if event.PublishedAt().Before(time.Now()) {
+	if event.PublishedAt().After(time.Now()) {
 		time.AfterFunc(event.PublishedAt().Sub(time.Now()), func() {
 			c.events = append(c.events, event)
 		})

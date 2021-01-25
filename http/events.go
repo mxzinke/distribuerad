@@ -1,7 +1,7 @@
 package events_http
 
 import (
-	"distribuerad/core"
+	"distribuerad/core/event"
 	"encoding/json"
 	"github.com/julienschmidt/httprouter"
 	"log"
@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
+func handleCreateNewEvent(store event.domain) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
@@ -46,7 +46,7 @@ func handleCreateNewEvent(store domain.IChannelStore) httprouter.Handle {
 	}
 }
 
-func handleGetAllEvents(store domain.IChannelStore) httprouter.Handle {
+func handleGetAllEvents(store event.domain) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
@@ -71,7 +71,7 @@ const (
 	unlockAction = "UNLOCK"
 )
 
-func handleLockEvent(store domain.IChannelStore) httprouter.Handle {
+func handleLockEvent(store event.domain) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		channel := resolveChannelName(store, p)
 
@@ -106,7 +106,7 @@ func handleLockEvent(store domain.IChannelStore) httprouter.Handle {
 	}
 }
 
-func handleDeleteEvent(store domain.IChannelStore) httprouter.Handle {
+func handleDeleteEvent(store event.domain) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		if err := resolveChannelName(store, p).DeleteEvent(p.ByName("event-id")); err != nil {
 			errorResponse(w, err.Error(), http.StatusNotFound)

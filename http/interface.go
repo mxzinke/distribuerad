@@ -1,7 +1,7 @@
 package events_http
 
 import (
-	"distribuerad/core"
+	"distribuerad/core/event"
 )
 
 type queue struct {
@@ -11,6 +11,6 @@ type queue struct {
 }
 
 type jobsList struct {
-	ChannelName string        `json:"channelName"`
-	Jobs        []*domain.Job `json:"jobs"`
+	ChannelName string          `json:"channelName"`
+	Jobs        []*event.domain `json:"jobs"`
 }
